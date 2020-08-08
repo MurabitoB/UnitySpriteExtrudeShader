@@ -17,13 +17,12 @@
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma geometry geom
-				#pragma multi_compile_shadowcaster
+			#pragma multi_compile_shadowcaster
 			#include "UnityCG.cginc"
 			
 			struct appdata_t
 			{
 				float4 pos   : POSITION;
-				float2 texcoord : TEXCOORD0;
 			};
 
 			struct v2g

@@ -24,12 +24,16 @@
 			"IgnoreProjector"="True" 
 			"PreviewType"="Plane"
 			"CanUseSpriteAtlas"="True"
+			"LightMode"="ForwardBase"
 		}
 		CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma geometry geom
+			#pragma multi_compile_fwdbase
 			#include "UnityCG.cginc"
+			#include "Lighting.cginc"
+			#include "AutoLight.cginc"
 			
 			struct appdata_t
 			{
@@ -46,6 +50,10 @@
 			{
 				float4 pos   : SV_POSITION;
 				float3 texcoord  : TEXCOORD0;
+				float3 normal : TEXCOORD1;
+				float3 worldPos : TEXCOORD2;
+				float3 worldNormal : TEXCOORD3;
+				SHADOW_COORDS(4)
 			};
 			
 			fixed4 _Color;
@@ -85,95 +93,157 @@
 				float2 v2dtex1 = float2(v2d * _SideTex_ST.x,1 * _SideTex_ST.y);
 
 				float3 normal = float3(0,0,1 * _Depth);
-				g2f OUT;
-				// Draw Front Cap
+
+				float3 worldNormal = UnityObjectToWorldNormal(float3(0,0,-1));
 				
+				g2f OUT;
+				OUT.normal = normal;
+				// Draw Front Cap
 				OUT.pos = UnityObjectToClipPos(v0);
+				OUT.worldPos = UnityObjectToWorldDir(v0);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(IN[0].texcoord,0);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v1);
+				OUT.worldPos = UnityObjectToWorldDir(v1);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(IN[1].texcoord,0);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v2);
+				OUT.worldPos = UnityObjectToWorldDir(v2);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(IN[2].texcoord,0);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				triStream.RestartStrip();
-
+				worldNormal = UnityObjectToWorldNormal(float3(0,0,1));
 				//Draw Back Side
 				OUT.pos = UnityObjectToClipPos(v1 + normal);
+				OUT.worldPos = UnityObjectToWorldDir(v1 + normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(IN[1].texcoord,0);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
-				OUT.pos = UnityObjectToClipPos(v0 + normal) ;
+				OUT.pos = UnityObjectToClipPos(v0 + normal);
+				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(IN[0].texcoord,0);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v2 + normal);
+				OUT.worldPos = UnityObjectToWorldDir(v2 + normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(IN[2].texcoord,0);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 				triStream.RestartStrip();
 				
-				//Draw Cardboard Side 
+				//Draw Cardboard Side
+				float3 v02 = v2 - v0;
+				worldNormal = UnityObjectToWorldNormal(cross(v02,normal));
 				OUT.pos = UnityObjectToClipPos(v0);
+				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v0dtex0,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v2);
+				OUT.worldPos = UnityObjectToWorldDir(v2);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v2dtex0,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v0 + normal);
+				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				triStream.RestartStrip();
 
 				OUT.pos = UnityObjectToClipPos(v2 + normal);
+				OUT.worldPos = UnityObjectToWorldDir(v2 + normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v2dtex1,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v0 + normal);
+				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v2);
+				OUT.worldPos = UnityObjectToWorldDir(v2);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v2dtex0,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				triStream.RestartStrip();
 
 				//Draw Cardboard Side 
+				float3 v01 = v0 - v1;
+				worldNormal = UnityObjectToWorldNormal(cross(v01,normal));
+	
 				OUT.pos = UnityObjectToClipPos(v1);
+				OUT.worldPos = UnityObjectToWorldDir(v1);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v1dtex0,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v0);
+				OUT.worldPos = UnityObjectToWorldDir(v0);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v0dtex0,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v0 + normal);
+				OUT.worldPos = UnityObjectToWorldDir(v0 +normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				triStream.RestartStrip();
 
 				OUT.pos = UnityObjectToClipPos(v0 +  normal);
+				OUT.worldPos = UnityObjectToWorldDir(v0 +  normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v1 + normal);
+				OUT.worldPos = UnityObjectToWorldDir(v1 +  normal);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v1dtex1,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				OUT.pos = UnityObjectToClipPos(v1);
+				OUT.worldPos = UnityObjectToWorldDir(v1);
+				OUT.worldNormal = worldNormal;
 				OUT.texcoord = float3(v1dtex0,1);
+				TRANSFER_SHADOW(OUT);
 				triStream.Append(OUT);
 
 				triStream.RestartStrip();
-
+				
 
 			}
 
@@ -193,12 +263,17 @@
 
 			fixed4 frag(g2f IN) : SV_Target
 			{
+				fixed3 lightDir = normalize(UnityWorldSpaceLightDir(IN.worldPos));
+				fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+				fixed3 diffuse = _LightColor0.rgb * max(0, dot(normalize(IN.worldNormal), lightDir));
 				fixed4 c = SampleSpriteTexture (IN.texcoord);
-				return c;
+				UNITY_LIGHT_ATTENUATION(atten, IN, IN.worldPos);
+				return fixed4(c.rgb * ambient +  (c.rgb * diffuse) * atten ,1);
 			}
             
 		ENDCG
 		}
+		// ShadowPass
 		UsePass "Sprites/SpriteExtrudeShadowCaster/ShadowCaster"
 	}
 }
