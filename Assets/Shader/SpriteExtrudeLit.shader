@@ -9,23 +9,26 @@
 
 	SubShader
 	{
-		
-
-		Cull Back
-		Lighting Off
-		ZWrite On
-
-		Pass
+		Tags
 		{
-			Tags
-		{ 
+			"DisableBatching" = "True" 
 			"RenderType"="Opaque" 
 			"Queue"="Geometry"
 			"IgnoreProjector"="True" 
 			"PreviewType"="Plane"
 			"CanUseSpriteAtlas"="True"
-			"LightMode"="ForwardBase"
 		}
+
+		Cull Back
+		Lighting On
+		ZWrite On
+
+		Pass
+		{
+			Tags
+			{ 
+				"LightMode"="ForwardBase"
+			}
 		CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag

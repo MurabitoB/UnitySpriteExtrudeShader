@@ -2,17 +2,16 @@
 {
 	SubShader
 	{
-		
+		Tags
+		{ 
+			"RenderType"="Opaque" 
+			"Queue"="Geometry"
+			"CanUseSpriteAtlas"="True"
+			"LightMode"="ShadowCaster"
+		}
 		Pass
 		{
 			Name "ShadowCaster"
-			Tags
-			{ 
-				"RenderType"="Opaque" 
-				"Queue"="Geometry"
-				"CanUseSpriteAtlas"="True"
-				"LightMode"="ShadowCaster"
-			}
 		CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
