@@ -1,4 +1,4 @@
-﻿Shader "Sprites/SpriteExtrudeUnlit"
+﻿Shader "Sprites/SpriteExtrudeLit"
 {
 	Properties
 	{
@@ -9,7 +9,15 @@
 
 	SubShader
 	{
-		Tags
+		
+
+		Cull Back
+		Lighting Off
+		ZWrite On
+
+		Pass
+		{
+			Tags
 		{ 
 			"RenderType"="Opaque" 
 			"Queue"="Geometry"
@@ -17,18 +25,9 @@
 			"PreviewType"="Plane"
 			"CanUseSpriteAtlas"="True"
 		}
-
-		Cull Back
-		Lighting Off
-		ZWrite On
-	//	Blend One OneMinusSrcAlpha
-
-		Pass
-		{
 		CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma multi_compile _ PIXELSNAP_ON
 			#pragma geometry geom
 			#include "UnityCG.cginc"
 			
@@ -200,5 +199,6 @@
             
 		ENDCG
 		}
+		UsePass "Sprites/SpriteExtrudeShadowCaster/ShadowCaster"
 	}
 }
