@@ -31,7 +31,7 @@
 			#pragma multi_compile _ PIXELSNAP_ON
 			#pragma geometry geom
 			#include "UnityCG.cginc"
-			
+			#include "SpriteExtrude.cginc"
 			struct appdata_t
 			{
 				float4 pos   : POSITION;
@@ -51,10 +51,6 @@
 			
 			fixed4 _Color;
 			float _Depth;
-			sampler2D _MainTex;
-			sampler2D _SideTex;
-			float4 _SideTex_ST;
-			sampler2D _AlphaTex;
 			v2g vert(appdata_t IN)
 			{
 				v2g OUT;
@@ -176,20 +172,6 @@
 				triStream.RestartStrip();
 
 
-			}
-
-			fixed4 SampleSpriteTexture (float3 uv)
-			{
-				fixed4 color;
-				if(uv.z == 0)
-				{
-					color = tex2D (_MainTex, uv.xy);
-				}
-				else
-				{
-					color = tex2D(_SideTex,uv.xy);
-				}	
-				return color;
 			}
 
 			fixed4 frag(g2f IN) : SV_Target
