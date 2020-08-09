@@ -67,10 +67,10 @@
 			sampler2D _AlphaTex;
 			v2g vert(appdata_t IN)
 			{
-				v2g OUT;
-				OUT.pos = IN.pos;
-				OUT.texcoord = IN.texcoord;
-				return OUT;
+				v2g v;
+				v.pos = IN.pos;
+				v.texcoord = IN.texcoord;
+				return v;
 			}
 			[maxvertexcount(18)]
 			void geom(triangle v2g IN[3],inout TriangleStream<g2f> triStream)
@@ -99,101 +99,101 @@
 
 				float3 worldNormal = UnityObjectToWorldNormal(float3(0,0,-1));
 				
-				g2f OUT;
-				OUT.normal = normal;
+				g2f v;
+				v.normal = normal;
 				// Draw Front Cap
-				OUT.pos = UnityObjectToClipPos(v0);
-				OUT.worldPos = UnityObjectToWorldDir(v0);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[0].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0);
+				v.worldPos = UnityObjectToWorldDir(v0);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[0].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v1);
-				OUT.worldPos = UnityObjectToWorldDir(v1);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[1].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1);
+				v.worldPos = UnityObjectToWorldDir(v1);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[1].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v2);
-				OUT.worldPos = UnityObjectToWorldDir(v2);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[2].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2);
+				v.worldPos = UnityObjectToWorldDir(v2);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[2].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 				worldNormal = UnityObjectToWorldNormal(float3(0,0,1));
 				//Draw Back Side
-				OUT.pos = UnityObjectToClipPos(v1 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v1 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[1].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1 + normal);
+				v.worldPos = UnityObjectToWorldDir(v1 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[1].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[0].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 + normal);
+				v.worldPos = UnityObjectToWorldDir(v0 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[0].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v2 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v2 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[2].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2 + normal);
+				v.worldPos = UnityObjectToWorldDir(v2 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[2].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 				triStream.RestartStrip();
 				
 				//Draw Cardboard Side
 				float3 v02 = v2 - v0;
 				worldNormal = UnityObjectToWorldNormal(cross(v02,normal));
-				OUT.pos = UnityObjectToClipPos(v0);
-				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0);
+				v.worldPos = UnityObjectToWorldDir(v0 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v2);
-				OUT.worldPos = UnityObjectToWorldDir(v2);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v2dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2);
+				v.worldPos = UnityObjectToWorldDir(v2);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v2dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 + normal);
+				v.worldPos = UnityObjectToWorldDir(v0 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 
-				OUT.pos = UnityObjectToClipPos(v2 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v2 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v2dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2 + normal);
+				v.worldPos = UnityObjectToWorldDir(v2 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v2dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 + normal);
+				v.worldPos = UnityObjectToWorldDir(v0 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v2);
-				OUT.worldPos = UnityObjectToWorldDir(v2);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v2dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2);
+				v.worldPos = UnityObjectToWorldDir(v2);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v2dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 
@@ -201,49 +201,49 @@
 				float3 v01 = v0 - v1;
 				worldNormal = UnityObjectToWorldNormal(cross(v01,normal));
 	
-				OUT.pos = UnityObjectToClipPos(v1);
-				OUT.worldPos = UnityObjectToWorldDir(v1);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v1dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1);
+				v.worldPos = UnityObjectToWorldDir(v1);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v1dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0);
-				OUT.worldPos = UnityObjectToWorldDir(v0);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0);
+				v.worldPos = UnityObjectToWorldDir(v0);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 +normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 + normal);
+				v.worldPos = UnityObjectToWorldDir(v0 +normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 
-				OUT.pos = UnityObjectToClipPos(v0 +  normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 +  normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 +  normal);
+				v.worldPos = UnityObjectToWorldDir(v0 +  normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v1 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v1 +  normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v1dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1 + normal);
+				v.worldPos = UnityObjectToWorldDir(v1 +  normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v1dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v1);
-				OUT.worldPos = UnityObjectToWorldDir(v1);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v1dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1);
+				v.worldPos = UnityObjectToWorldDir(v1);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v1dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 				
@@ -321,10 +321,10 @@
 			sampler2D _AlphaTex;
 			v2g vert(appdata_t IN)
 			{
-				v2g OUT;
-				OUT.pos = IN.pos;
-				OUT.texcoord = IN.texcoord;
-				return OUT;
+				v2g v;
+				v.pos = IN.pos;
+				v.texcoord = IN.texcoord;
+				return v;
 			}
 			[maxvertexcount(18)]
 			void geom(triangle v2g IN[3],inout TriangleStream<g2f> triStream)
@@ -353,101 +353,101 @@
 
 				float3 worldNormal = UnityObjectToWorldNormal(float3(0,0,-1));
 				
-				g2f OUT;
-				OUT.normal = normal;
+				g2f v;
+				v.normal = normal;
 				// Draw Front Cap
-				OUT.pos = UnityObjectToClipPos(v0);
-				OUT.worldPos = UnityObjectToWorldDir(v0);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[0].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0);
+				v.worldPos = UnityObjectToWorldDir(v0);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[0].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v1);
-				OUT.worldPos = UnityObjectToWorldDir(v1);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[1].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1);
+				v.worldPos = UnityObjectToWorldDir(v1);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[1].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v2);
-				OUT.worldPos = UnityObjectToWorldDir(v2);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[2].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2);
+				v.worldPos = UnityObjectToWorldDir(v2);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[2].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 				worldNormal = UnityObjectToWorldNormal(float3(0,0,1));
 				//Draw Back Side
-				OUT.pos = UnityObjectToClipPos(v1 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v1 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[1].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1 + normal);
+				v.worldPos = UnityObjectToWorldDir(v1 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[1].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[0].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 + normal);
+				v.worldPos = UnityObjectToWorldDir(v0 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[0].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v2 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v2 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(IN[2].texcoord,0);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2 + normal);
+				v.worldPos = UnityObjectToWorldDir(v2 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(IN[2].texcoord,0);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 				triStream.RestartStrip();
 				
 				//Draw Cardboard Side
 				float3 v02 = v2 - v0;
 				worldNormal = UnityObjectToWorldNormal(cross(v02,normal));
-				OUT.pos = UnityObjectToClipPos(v0);
-				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0);
+				v.worldPos = UnityObjectToWorldDir(v0 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v2);
-				OUT.worldPos = UnityObjectToWorldDir(v2);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v2dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2);
+				v.worldPos = UnityObjectToWorldDir(v2);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v2dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 + normal);
+				v.worldPos = UnityObjectToWorldDir(v0 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 
-				OUT.pos = UnityObjectToClipPos(v2 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v2 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v2dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2 + normal);
+				v.worldPos = UnityObjectToWorldDir(v2 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v2dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 + normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 + normal);
+				v.worldPos = UnityObjectToWorldDir(v0 + normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v2);
-				OUT.worldPos = UnityObjectToWorldDir(v2);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v2dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v2);
+				v.worldPos = UnityObjectToWorldDir(v2);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v2dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 
@@ -455,49 +455,49 @@
 				float3 v01 = v0 - v1;
 				worldNormal = UnityObjectToWorldNormal(cross(v01,normal));
 	
-				OUT.pos = UnityObjectToClipPos(v1);
-				OUT.worldPos = UnityObjectToWorldDir(v1);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v1dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1);
+				v.worldPos = UnityObjectToWorldDir(v1);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v1dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0);
-				OUT.worldPos = UnityObjectToWorldDir(v0);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0);
+				v.worldPos = UnityObjectToWorldDir(v0);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v0 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 +normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 + normal);
+				v.worldPos = UnityObjectToWorldDir(v0 +normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 
-				OUT.pos = UnityObjectToClipPos(v0 +  normal);
-				OUT.worldPos = UnityObjectToWorldDir(v0 +  normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v0dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v0 +  normal);
+				v.worldPos = UnityObjectToWorldDir(v0 +  normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v0dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v1 + normal);
-				OUT.worldPos = UnityObjectToWorldDir(v1 +  normal);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v1dtex1,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1 + normal);
+				v.worldPos = UnityObjectToWorldDir(v1 +  normal);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v1dtex1,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
-				OUT.pos = UnityObjectToClipPos(v1);
-				OUT.worldPos = UnityObjectToWorldDir(v1);
-				OUT.worldNormal = worldNormal;
-				OUT.texcoord = float3(v1dtex0,1);
-				TRANSFER_SHADOW(OUT);
-				triStream.Append(OUT);
+				v.pos = UnityObjectToClipPos(v1);
+				v.worldPos = UnityObjectToWorldDir(v1);
+				v.worldNormal = worldNormal;
+				v.texcoord = float3(v1dtex0,1);
+				TRANSFER_SHADOW(v);
+				triStream.Append(v);
 
 				triStream.RestartStrip();
 				
