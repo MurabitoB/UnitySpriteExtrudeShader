@@ -31,8 +31,8 @@
 			}
 		CGPROGRAM
 			#pragma vertex vert
-			#pragma fragment frag
-			#pragma geometry geom
+			#pragma fragment frag_lit
+			#pragma geometry geom_lit
 			#pragma multi_compile_fwdbase
 			#include "UnityCG.cginc"
 			#include "Lighting.cginc"
@@ -49,7 +49,7 @@
 				float4 pos   : SV_POSITION;
 				float2 texcoord  : TEXCOORD0;
 			};
-			struct g2f
+			struct g2f_lit
 			{
 				float4 pos   : SV_POSITION;
 				float3 texcoord  : TEXCOORD0;
@@ -73,7 +73,7 @@
 				return v;
 			}
 			[maxvertexcount(18)]
-			void geom(triangle v2g IN[3],inout TriangleStream<g2f> triStream)
+			void geom_lit(triangle v2g IN[3],inout TriangleStream<g2f_lit> triStream)
 			{
 				float3 v0 = IN[0].pos.xyz;
 				float3 v1 = IN[1].pos.xyz;
@@ -99,7 +99,7 @@
 
 				float3 worldNormal = UnityObjectToWorldNormal(float3(0,0,-1));
 				
-				g2f v;
+				g2f_lit v;
 				v.normal = normal;
 				// Draw Front Cap
 				v.pos = UnityObjectToClipPos(v0);
@@ -244,10 +244,7 @@
 				v.texcoord = float3(v1dtex0,1);
 				TRANSFER_SHADOW(v);
 				triStream.Append(v);
-
 				triStream.RestartStrip();
-				
-
 			}
 
 			fixed4 SampleSpriteTexture (float3 uv)
@@ -264,7 +261,7 @@
 				return color;
 			}
 
-			fixed4 frag(g2f IN) : SV_Target
+			fixed4 frag_lit(g2f_lit IN) : SV_Target
 			{
 				fixed3 lightDir = normalize(UnityWorldSpaceLightDir(IN.worldPos));
 				fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
@@ -285,8 +282,8 @@
 			Blend One One
 		CGPROGRAM
 			#pragma vertex vert
-			#pragma fragment frag
-			#pragma geometry geom
+			#pragma fragment frag_lit
+			#pragma geometry geom_lit
 			#pragma multi_compile_fwdadd
 			#include "UnityCG.cginc"
 			#include "Lighting.cginc"
@@ -327,7 +324,7 @@
 				return v;
 			}
 			[maxvertexcount(18)]
-			void geom(triangle v2g IN[3],inout TriangleStream<g2f> triStream)
+			void geom_lit(triangle v2g IN[3],inout TriangleStream<g2f> triStream)
 			{
 				float3 v0 = IN[0].pos.xyz;
 				float3 v1 = IN[1].pos.xyz;
@@ -518,7 +515,7 @@
 				return color;
 			}
 
-			fixed4 frag(g2f IN) : SV_Target
+			fixed4 frag_lit(g2f IN) : SV_Target
 			{
 				fixed3 lightDir = normalize(UnityWorldSpaceLightDir(IN.worldPos));
 				fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
