@@ -9,7 +9,7 @@ float4 _MainTex_ST;
 sampler2D _SideTex;
 float4 _SideTex_ST;
 #include "AutoLight.cginc"
-
+#include "Lighting.cginc"
 // The reason why the below macro exist
 // https://forum.unity.com/threads/unrecognized-identifier-shadow_coords-error-in-2017-3.509446/
 
@@ -475,5 +475,14 @@ fixed4 frag(g2f_standard IN) : SV_Target
 {
     fixed4 c = SampleSpriteTexture(IN.texcoord);
     return c;
+}
+fixed4 frag_lit(g2f_lit IN) : SV_Target
+{
+    fixed3 lightDir = normalize(UnityWorldSpaceLightDir(IN.worldPos));
+    fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+    fixed3 diffuse = _LightColor0.rgb * max(0, dot(normalize(IN.worldNormal), lightDir));
+    fixed4 c = SampleSpriteTexture (IN.texcoord);
+    UNITY_LIGHT_ATTENUATION(atten, IN, IN.worldPos);
+    return fixed4(c.rgb * ambient +  (c.rgb * diffuse) * atten ,1);
 }
 #endif
