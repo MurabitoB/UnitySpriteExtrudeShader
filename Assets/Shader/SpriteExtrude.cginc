@@ -8,43 +8,12 @@ sampler2D _MainTex;
 float4 _MainTex_ST;
 sampler2D _SideTex;
 float4 _SideTex_ST;
-#include "AutoLight.cginc"
-#include "Lighting.cginc"
-// The reason why the below macro exist
-// https://forum.unity.com/threads/unrecognized-identifier-shadow_coords-error-in-2017-3.509446/
-
-
-#ifndef AUTOLIGHT_FIXES_INCLUDED
-#define AUTOLIGHT_FIXES_INCLUDED
+float _Metallic;
+float _Gloss;
+ #include "AutoLight.cginc"
+ #include "Lighting.cginc"
  
-#include "HLSLSupport.cginc"
-#include "UnityShadowLibrary.cginc"
- 
-// Problem 1: SHADOW_COORDS - undefined identifier.
-// Why: Using SHADOWS_DEPTH without SPOT.
-// The file AutoLight.cginc only takes into account the case where you use SHADOWS_DEPTH + SPOT (to enable SPOT just add a Spot Light in the scene).
-// So, if your scene doesn't have a Spot Light, it will skip the SHADOW_COORDS definition and shows the error.
-// Now, to workaround this you can:
-// 1. Add a Spot Light to your scene
-// 2. Use this CGINC to workaround this scase.  Also, you can copy this in your own shader.
-#if defined (SHADOWS_DEPTH) && !defined (SPOT)
-#       define SHADOW_COORDS(idx1) unityShadowCoord2 _ShadowCoord : TEXCOORD##idx1;
-#endif
- 
- 
-// Problem 2: _ShadowCoord - invalid subscript.
-// Why: nor Shadow screen neighter Shadow Depth or Shadow Cube and trying to use _ShadowCoord attribute.
-// The file AutoLight.cginc defines SHADOW_COORDS to empty when no one of these options are enabled (SHADOWS_SCREEN, SHADOWS_DEPTH and SHADOWS_CUBE),
-// So, if you try to call "o._ShadowCoord = ..." it will break because _ShadowCoord isn't an attribute in your structure.
-// To workaround this you can:
-// 1. Check if one of those defines actually exists in any place where you have "o._ShadowCoord...".
-// 2. Use the define SHADOWS_ENABLED from this file to perform the same check.
-#if defined (SHADOWS_SCREEN) || defined (SHADOWS_DEPTH) || defined (SHADOWS_CUBE)
-#    define SHADOWS_ENABLED
-#    define TRANSFER_SHADOW(a) a._ShadowCoord = ComputeScreenPos(a.pos);
-#endif
- 
-#endif
+//#endif
 inline fixed4 SampleSpriteTexture (float3 uv)
 {
     if(uv.z == 0)
@@ -71,6 +40,7 @@ struct v2g_simple
 {
     float4 pos   : SV_POSITION;
 };
+
 struct g2f_simple
 {
     float4 pos   : SV_POSITION;
@@ -87,7 +57,14 @@ struct g2f_lit
     float3 normal : TEXCOORD1;
     float3 worldPos : TEXCOORD2;
     float3 worldNormal : TEXCOORD3;
-    SHADOW_COORDS(4)
+ //   SHADOW_COORDS(4) Geometry shader not suppot forward rendering path
+};
+struct structurePS
+{
+    half4 specular : SV_Target0;
+    half4 albedo : SV_Target1;
+    half4 normal : SV_Target2;
+    half4 emission : SV_Target3;
 };
 v2g vert(appdata_t IN)
 {
@@ -116,14 +93,14 @@ void geom_standard(triangle v2g IN[3],inout TriangleStream<g2f_standard> triStre
     float v0d = atan2(v0td.y,v0td.x);
     float v1d = atan2(v1td.y,v1td.x);
     float v2d = atan2(v2td.y,v2td.x);
+   
+    float2 v0dtex0 = float2(v0d * _SideTex_ST.x + _SideTex_ST.z ,0 + _SideTex_ST.w);
+    float2 v1dtex0 = float2(v1d * _SideTex_ST.x + _SideTex_ST.z ,0 + _SideTex_ST.w);
+    float2 v2dtex0 = float2(v2d * _SideTex_ST.x + _SideTex_ST.z,0+ _SideTex_ST.w);
 
-    float2 v0dtex0 = float2(v0d * _SideTex_ST.x ,0);
-    float2 v1dtex0 = float2(v1d * _SideTex_ST.x,0);
-    float2 v2dtex0 = float2(v2d * _SideTex_ST.x,0);
-
-    float2 v0dtex1 = float2(v0d * _SideTex_ST.x,1 * _SideTex_ST.y);
-    float2 v1dtex1 = float2(v1d * _SideTex_ST.x,1 * _SideTex_ST.y);
-    float2 v2dtex1 = float2(v2d * _SideTex_ST.x,1 * _SideTex_ST.y);
+    float2 v0dtex1 = float2(v0d * _SideTex_ST.x + _SideTex_ST.z,1 * _SideTex_ST.y+ _SideTex_ST.w);
+    float2 v1dtex1 = float2(v1d * _SideTex_ST.x + _SideTex_ST.z,1 * _SideTex_ST.y+ _SideTex_ST.w);
+    float2 v2dtex1 = float2(v2d * _SideTex_ST.x + _SideTex_ST.z,1 * _SideTex_ST.y+ _SideTex_ST.w);
 
     float3 normal = float3(0,0,1 * _Depth);
     g2f_standard v;
@@ -132,7 +109,6 @@ void geom_standard(triangle v2g IN[3],inout TriangleStream<g2f_standard> triStre
     v.pos = UnityObjectToClipPos(v0);
     v.texcoord = float3(IN[0].texcoord,0);
     triStream.Append(v);
-
     v.pos = UnityObjectToClipPos(v1);
     v.texcoord = float3(IN[1].texcoord,0);
     triStream.Append(v);
@@ -227,70 +203,70 @@ void geom_simple(triangle v2g_simple IN[3],inout TriangleStream<g2f_simple> triS
     g2f_simple v;
     // Draw Front Cap
     
-    v.pos = UnityObjectToClipPos(v0);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v0));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v1);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v1));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v2);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v2));
     triStream.Append(v);
 
     triStream.RestartStrip();
 
     //Draw Back Side
-    v.pos = UnityObjectToClipPos(v1 + normal);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v1 + normal));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v0 + normal) ;
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v0 + normal));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v2 + normal);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v2 + normal));
     triStream.Append(v);
     triStream.RestartStrip();
     
     //Draw Cardboard Side 
-    v.pos = UnityObjectToClipPos(v0);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v0));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v2);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v2));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v0 + normal);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v0 + normal));
     triStream.Append(v);
 
     triStream.RestartStrip();
 
-    v.pos = UnityObjectToClipPos(v2 + normal);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v2 + normal));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v0 + normal);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v0 + normal));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v2);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v2));
     triStream.Append(v);
 
     triStream.RestartStrip();
 
     //Draw Cardboard Side 
-    v.pos = UnityObjectToClipPos(v1);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v1));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v0);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v0));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v0 + normal);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v0 + normal));
     triStream.Append(v);
 
     triStream.RestartStrip();
 
-    v.pos = UnityObjectToClipPos(v0 +  normal);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v0 +  normal));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v1 + normal);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v1 + normal));
     triStream.Append(v);
 
-    v.pos = UnityObjectToClipPos(v1);
+    v.pos = UnityApplyLinearShadowBias(UnityObjectToClipPos(v1));
     triStream.Append(v);
     triStream.RestartStrip();
     
@@ -311,13 +287,13 @@ void geom_lit(triangle v2g IN[3],inout TriangleStream<g2f_lit> triStream)
     float v1d = atan2(v1td.y,v1td.x);
     float v2d = atan2(v2td.y,v2td.x);
 
-    float2 v0dtex0 = float2(v0d * _SideTex_ST.x ,0);
-    float2 v1dtex0 = float2(v1d * _SideTex_ST.x,0);
-    float2 v2dtex0 = float2(v2d * _SideTex_ST.x,0);
+    float2 v0dtex0 = float2(v0d * _SideTex_ST.x + _SideTex_ST.z ,0 + _SideTex_ST.w);
+    float2 v1dtex0 = float2(v1d * _SideTex_ST.x + _SideTex_ST.z ,0 + _SideTex_ST.w);
+    float2 v2dtex0 = float2(v2d * _SideTex_ST.x + _SideTex_ST.z,0+ _SideTex_ST.w);
 
-    float2 v0dtex1 = float2(v0d * _SideTex_ST.x,1 * _SideTex_ST.y);
-    float2 v1dtex1 = float2(v1d * _SideTex_ST.x,1 * _SideTex_ST.y);
-    float2 v2dtex1 = float2(v2d * _SideTex_ST.x,1 * _SideTex_ST.y);
+    float2 v0dtex1 = float2(v0d * _SideTex_ST.x + _SideTex_ST.z,1 * _SideTex_ST.y+ _SideTex_ST.w);
+    float2 v1dtex1 = float2(v1d * _SideTex_ST.x + _SideTex_ST.z,1 * _SideTex_ST.y+ _SideTex_ST.w);
+    float2 v2dtex1 = float2(v2d * _SideTex_ST.x + _SideTex_ST.z,1 * _SideTex_ST.y+ _SideTex_ST.w);
 
     float3 normal = float3(0,0,1 * _Depth);
 
@@ -330,21 +306,21 @@ void geom_lit(triangle v2g IN[3],inout TriangleStream<g2f_lit> triStream)
     v.worldPos = UnityObjectToWorldDir(v0);
     v.worldNormal = worldNormal;
     v.texcoord = float3(IN[0].texcoord,0);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v1);
     v.worldPos = UnityObjectToWorldDir(v1);
     v.worldNormal = worldNormal;
     v.texcoord = float3(IN[1].texcoord,0);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v2);
     v.worldPos = UnityObjectToWorldDir(v2);
     v.worldNormal = worldNormal;
     v.texcoord = float3(IN[2].texcoord,0);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     triStream.RestartStrip();
@@ -354,21 +330,21 @@ void geom_lit(triangle v2g IN[3],inout TriangleStream<g2f_lit> triStream)
     v.worldPos = UnityObjectToWorldDir(v1 + normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(IN[1].texcoord,0);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v0 + normal);
     v.worldPos = UnityObjectToWorldDir(v0 + normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(IN[0].texcoord,0);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v2 + normal);
     v.worldPos = UnityObjectToWorldDir(v2 + normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(IN[2].texcoord,0);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
     triStream.RestartStrip();
     
@@ -379,21 +355,21 @@ void geom_lit(triangle v2g IN[3],inout TriangleStream<g2f_lit> triStream)
     v.worldPos = UnityObjectToWorldDir(v0 + normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v0dtex0,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v2);
     v.worldPos = UnityObjectToWorldDir(v2);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v2dtex0,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v0 + normal);
     v.worldPos = UnityObjectToWorldDir(v0 + normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v0dtex1,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     triStream.RestartStrip();
@@ -402,21 +378,21 @@ void geom_lit(triangle v2g IN[3],inout TriangleStream<g2f_lit> triStream)
     v.worldPos = UnityObjectToWorldDir(v2 + normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v2dtex1,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v0 + normal);
     v.worldPos = UnityObjectToWorldDir(v0 + normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v0dtex1,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v2);
     v.worldPos = UnityObjectToWorldDir(v2);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v2dtex0,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     triStream.RestartStrip();
@@ -429,21 +405,21 @@ void geom_lit(triangle v2g IN[3],inout TriangleStream<g2f_lit> triStream)
     v.worldPos = UnityObjectToWorldDir(v1);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v1dtex0,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v0);
     v.worldPos = UnityObjectToWorldDir(v0);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v0dtex0,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v0 + normal);
     v.worldPos = UnityObjectToWorldDir(v0 +normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v0dtex1,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     triStream.RestartStrip();
@@ -452,21 +428,21 @@ void geom_lit(triangle v2g IN[3],inout TriangleStream<g2f_lit> triStream)
     v.worldPos = UnityObjectToWorldDir(v0 +  normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v0dtex1,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v1 + normal);
     v.worldPos = UnityObjectToWorldDir(v1 +  normal);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v1dtex1,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
 
     v.pos = UnityObjectToClipPos(v1);
     v.worldPos = UnityObjectToWorldDir(v1);
     v.worldNormal = worldNormal;
     v.texcoord = float3(v1dtex0,1);
-    TRANSFER_SHADOW(v);
+   // TRANSFER_SHADOW(v);
     triStream.Append(v);
     triStream.RestartStrip();
 }
@@ -476,13 +452,31 @@ fixed4 frag(g2f_standard IN) : SV_Target
     fixed4 c = SampleSpriteTexture(IN.texcoord);
     return c;
 }
-fixed4 frag_lit(g2f_lit IN) : SV_Target
+structurePS frag_deffered_lit (g2f_lit vs)
 {
-    fixed3 lightDir = normalize(UnityWorldSpaceLightDir(IN.worldPos));
-    fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
-    fixed3 diffuse = _LightColor0.rgb * max(0, dot(normalize(IN.worldNormal), lightDir));
-    fixed4 c = SampleSpriteTexture (IN.texcoord);
-    UNITY_LIGHT_ATTENUATION(atten, IN, IN.worldPos);
-    return fixed4(c.rgb * ambient +  (c.rgb * diffuse) * atten ,1);
+    structurePS ps;
+    float3 normalDirection = normalize(vs.worldNormal);
+    half3 specular;
+    half specularMonochrome; 
+    half3 diffuseColor = DiffuseAndSpecularFromMetallic(SampleSpriteTexture(vs.texcoord), _Metallic, specular, specularMonochrome );
+    ps.albedo = half4(diffuseColor, 1.0 );
+    ps.specular = half4(specular,_Gloss );
+    ps.normal = half4( normalDirection * 0.5 + 0.5, 1.0 );
+    ps.emission = half4(0,0,0,1);
+    #ifndef UNITY_HDR_ON
+        ps.emission.rgb = exp2(-ps.emission.rgb);
+    #endif
+    return ps;
 }
+// Geometry shader not support Forward Rending Path
+// fixed4 frag_lit(g2f_lit IN) : SV_Target
+// {
+//     fixed3 lightDir = normalize(UnityWorldSpaceLightDir(IN.worldPos));
+//     fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+//     fixed3 diffuse = _LightColor0.rgb * max(0, dot(normalize(IN.worldNormal), lightDir));
+//     fixed4 c = SampleSpriteTexture (IN.texcoord);
+//     UNITY_LIGHT_ATTENUATION(atten, IN, IN.worldPos);
+//     return fixed4(c.rgb * ambient +  (c.rgb * diffuse) * atten ,1);
+// }
+
 #endif
