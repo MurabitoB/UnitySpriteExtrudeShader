@@ -11,6 +11,10 @@ You can use it in sprite renderer.
 
 The lit shader no support forward rendering, because I can't get the right result of light attention when using geometry shader.
 
+If the sprite don't cast shadow or receive shadow, please make the inspector to Debug mode and check the option is being setted to the right option.
+![jpeg](https://i.imgur.com/fW9fFtq.png)
+
+
 
 ## Credits
 The sprite which I used in this demo.
