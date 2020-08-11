@@ -10,3 +10,8 @@ You can use it in sprite renderer.
 ## Important
 
 The lit shader no support forward rendering, because I can't get the right result of light attention when using geometry shader.
+
+
+## Credits
+The sprite which I used in this demo.
+https://unity-chan.com/contents/guideline/
